@@ -18,37 +18,37 @@
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
-class MainComponent   : public AudioAppComponent
+class MainComponent : public AudioAppComponent
 {
 public:
-    //==============================================================================
-    MainComponent();
-    ~MainComponent();
+  //==============================================================================
+  MainComponent();
+  ~MainComponent();
 
-    //==============================================================================
-    void prepareToPlay (int samplesPerBlockExpected, double sampleRate) override;
-    void getNextAudioBlock (const AudioSourceChannelInfo& bufferToFill) override;
-    void releaseResources() override;
+  //==============================================================================
+  void prepareToPlay(int samplesPerBlockExpected, double sampleRate) override;
+  void getNextAudioBlock(const AudioSourceChannelInfo &bufferToFill) override;
+  void releaseResources() override;
 
-    //==============================================================================
-    void paint (Graphics& g) override;
-    void resized() override;
+  //==============================================================================
+  void paint(Graphics &g) override;
+  void resized() override;
 
 private:
-    //==============================================================================
-    // Your private member variables go here...
-     
-    AudioFormatManager formatManager;
-    AudioThumbnailCache thumbCache{100}; 
+  //==============================================================================
+  // Your private member variables go here...
 
-    DJAudioPlayer player1{formatManager};
-    DeckGUI deckGUI1{&player1, formatManager, thumbCache}; 
+  AudioFormatManager formatManager;
+  AudioThumbnailCache thumbCache{100};
 
-    DJAudioPlayer player2{formatManager};
-    DeckGUI deckGUI2{&player2, formatManager, thumbCache}; 
+  DJAudioPlayer player1{formatManager};
+  DeckGUI deckGUI1{&player1, formatManager, thumbCache};
 
-    MixerAudioSource mixerSource; 
-    PlaylistComponent playlistComponent;
-    
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
+  DJAudioPlayer player2{formatManager};
+  DeckGUI deckGUI2{&player2, formatManager, thumbCache};
+
+  MixerAudioSource mixerSource;
+  PlaylistComponent playlistComponent;
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

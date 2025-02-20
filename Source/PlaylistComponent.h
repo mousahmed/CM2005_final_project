@@ -10,20 +10,21 @@
 
 #pragma once
 
-#include <JuceHeader.h>
+#include "../JuceLibraryCode/JuceHeader.h"
 
 //==============================================================================
 /*
-*/
-class PlaylistComponent  : public juce::Component
+ */
+class PlaylistComponent : public juce::Component
 {
 public:
-    PlaylistComponent();
-    ~PlaylistComponent() override;
+  PlaylistComponent();
+  ~PlaylistComponent() override;
 
-    void paint (juce::Graphics&) override;
-    void resized() override;
+  void paint(juce::Graphics &) override;
+  void resized() override;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PlaylistComponent)
+  TableListBox tableComponent;
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaylistComponent)
 };
