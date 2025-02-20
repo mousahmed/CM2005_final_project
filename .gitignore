@@ -1,0 +1,26 @@
+# C++ specific files
+*.o
+*.obj
+*.so
+*.dylib
+*.dll
+*.exe
+*.out
+
+# JUCE specific files
+*.jucer
+*.jucer_backup
+*.jucer_backup_*
+
+# CMake specific files
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Build directories
+build/
+Builds/
+.vscode/
+dist/
+bin/
