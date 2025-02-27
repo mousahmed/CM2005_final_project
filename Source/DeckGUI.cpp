@@ -92,12 +92,13 @@ void DeckGUI::buttonClicked(Button* button)
     {
         std::cout << "Play button was clicked " << std::endl;
         player->start();
+        playButton.setColour(TextButton::buttonColourId, Colours::darkgreen);
     }
      if (button == &stopButton)
     {
         std::cout << "Stop button was clicked " << std::endl;
         player->stop();
-
+        stopButton.setColour(TextButton::buttonColourId, Colours::darkred);
     }
     if (button == &loadButton)
     {
@@ -109,6 +110,7 @@ void DeckGUI::buttonClicked(Button* button)
             if (chosenFile.exists()){
                 player->loadURL(URL{chooser.getResult()});
                 waveformDisplay.loadURL(URL{chooser.getResult()});
+                loadButton.setColour(TextButton::buttonColourId, Colours::darkblue);
             }
         });
     }
@@ -116,8 +118,6 @@ void DeckGUI::buttonClicked(Button* button)
 
 void DeckGUI::sliderValueChanged (Slider *slider)
 {
-    if (slider == &volSlider)
-    {
         player->setGain(slider->getValue());
     }
 

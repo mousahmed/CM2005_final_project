@@ -10,15 +10,20 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PlaylistComponent.h"
-
+#include "iostream"
 //==============================================================================
 PlaylistComponent::PlaylistComponent()
 {
   // In your constructor, you should add any child components, and
   // initialise any special settings that your component needs.
-  tableComponent.getHeader().addColumn("Track Title", 0, 400);
-  tableComponent.getHeader().addColumn("Artist", 1, 300);
-  tableComponent.getHeader().addColumn("Duration", 2, 100);
+
+  trackTitles.push_back("Track 1");
+  trackTitles.push_back("Track 2");
+  trackTitles.push_back("Track 3");
+  tableComponent.getHeader().addColumn("Track Title", 1, 400);
+  tableComponent.getHeader().addColumn("Track Title", 2, 400);
+  tableComponent.getHeader().addColumn("Track Title", 3, 400);
+  tableComponent.setModel(this);
   addAndMakeVisible(tableComponent);
 }
 
@@ -51,4 +56,67 @@ void PlaylistComponent::resized()
   // This method is where you should set the bounds of any child
   // components that your component contains..
   tableComponent.setBounds(0, 0, getWidth(), getHeight());
+}
+
+int PlaylistComponent::getNumRows()
+{
+  return trackTitles.size();
+}
+
+void PlaylistComponent::paintRowBackground(juce::Graphics &g,
+                                           int rowNumber,
+                                           int width,
+                                           int height,
+                                           bool rowIsSelected)
+{
+  if (rowIsSelected)
+  {
+    g.fillAll(juce::Colours::lightblue);
+  }
+  else
+  {
+    g.fillAll(juce::Colours::darkgrey);
+  }
+}
+
+void PlaylistComponent::paintCell(juce::Graphics &g,
+                                  int rowNumber,
+                                  int columnId,
+                                  int width,
+                                  int height,
+                                  bool rowIsSelected)
+{
+  g.setColour(juce::Colours::black);
+  g.setFont(juce::FontOptions(14.0f));
+  g.drawText(trackTitles[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
+}
+
+Component *PlaylistComponent::refreshComponentForCell(int rowNumber,
+                                                      int columnId,
+                                                      bool isRowSelected,
+                                                      Component *existingComponentToUpdate)
+{
+  if (columnId == 2)
+  {
+    if (existingComponentToUpdate == nullptr)
+    {
+      TextButton *playButton = new TextButton("Play");
+      String id = String(rowNumber);
+      playButton->setComponentID(id);
+      playButton->addListener(this);
+      existingComponentToUpdate = playButton;
+      return existingComponentToUpdate;
+    }
+  }
+  return existingComponentToUpdate;
+}
+
+void PlaylistComponent::buttonClicked(Button *button)
+{
+  if (button->getButtonText() == "Play")
+  {
+    int id = button->getComponentID().getIntValue();
+
+    std::cout << "Play button clicked " << button->getComponentID() << " Play " << trackTitles[id] << std::endl;
+  }
 }
