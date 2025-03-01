@@ -118,19 +118,18 @@ void DeckGUI::buttonClicked(Button* button)
 
 void DeckGUI::sliderValueChanged (Slider *slider)
 {
+    if (slider == &volSlider)
+    {
         player->setGain(slider->getValue());
     }
-
-    if (slider == &speedSlider)
+    else if (slider == &speedSlider)
     {
         player->setSpeed(slider->getValue());
     }
-    
-    if (slider == &posSlider)
+    else if (slider == &posSlider)
     {
         player->setPositionRelative(slider->getValue());
     }
-    
 }
 
 bool DeckGUI::isInterestedInFileDrag (const StringArray &files)

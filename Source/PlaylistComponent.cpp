@@ -18,11 +18,8 @@ PlaylistComponent::PlaylistComponent()
   // initialise any special settings that your component needs.
 
   trackTitles.push_back("Track 1");
-  trackTitles.push_back("Track 2");
-  trackTitles.push_back("Track 3");
   tableComponent.getHeader().addColumn("Track Title", 1, 400);
-  tableComponent.getHeader().addColumn("Track Title", 2, 400);
-  tableComponent.getHeader().addColumn("Track Title", 3, 400);
+  tableComponent.getHeader().addColumn("Play", 2, 400);
   tableComponent.setModel(this);
   addAndMakeVisible(tableComponent);
 }
