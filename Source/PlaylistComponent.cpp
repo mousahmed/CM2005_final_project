@@ -10,61 +10,55 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "PlaylistComponent.h"
+#include "DJAudioPlayer.h"
 #include "iostream"
 //==============================================================================
-PlaylistComponent::PlaylistComponent()
+// Constructor
+PlaylistComponent::PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2)
+    : player1(_player1), player2(_player2)
 {
-  // In your constructor, you should add any child components, and
-  // initialise any special settings that your component needs.
-
-  trackTitles.push_back("Track 1");
-  tableComponent.getHeader().addColumn("Track Title", 1, 400);
-  tableComponent.getHeader().addColumn("Play", 2, 400);
+  // Initialize table columns
+  tableComponent.getHeader().addColumn("Track Title", 1, 500);
+  tableComponent.getHeader().addColumn("Play Deck 1", 2, 150);
+  tableComponent.getHeader().addColumn("Play Deck 2", 3, 150);
   tableComponent.setModel(this);
   addAndMakeVisible(tableComponent);
+
+  // Initialize load button
+  addAndMakeVisible(loadButton);
+  loadButton.setButtonText("Load Tracks");
+  loadButton.addListener(this);
 }
 
-PlaylistComponent::~PlaylistComponent()
-{
-}
+// Destructor
+PlaylistComponent::~PlaylistComponent() {}
 
+// Paint method
 void PlaylistComponent::paint(juce::Graphics &g)
 {
-  /* This demo code just fills the component's background and
-     draws some placeholder text to get you started.
-
-     You should replace everything in this method with your own
-     drawing code..
-  */
-
-  g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); // clear the background
-
+  g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
   g.setColour(juce::Colours::grey);
-  g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-
+  g.drawRect(getLocalBounds(), 1);
   g.setColour(juce::Colours::white);
   g.setFont(juce::FontOptions(14.0f));
-  g.drawText("PlaylistComponent", getLocalBounds(),
-             juce::Justification::centred, true); // draw some placeholder text
+  g.drawText("PlaylistComponent", getLocalBounds(), juce::Justification::centred, true);
 }
 
+// Resized method
 void PlaylistComponent::resized()
 {
-  // This method is where you should set the bounds of any child
-  // components that your component contains..
-  tableComponent.setBounds(0, 0, getWidth(), getHeight());
+  tableComponent.setBounds(0, 0, getWidth(), getHeight() - 30);
+  loadButton.setBounds(0, getHeight() - 30, getWidth(), 30);
 }
 
+// Get number of rows
 int PlaylistComponent::getNumRows()
 {
   return trackTitles.size();
 }
 
-void PlaylistComponent::paintRowBackground(juce::Graphics &g,
-                                           int rowNumber,
-                                           int width,
-                                           int height,
-                                           bool rowIsSelected)
+// Paint row background
+void PlaylistComponent::paintRowBackground(juce::Graphics &g, int rowNumber, int width, int height, bool rowIsSelected)
 {
   if (rowIsSelected)
   {
@@ -76,29 +70,23 @@ void PlaylistComponent::paintRowBackground(juce::Graphics &g,
   }
 }
 
-void PlaylistComponent::paintCell(juce::Graphics &g,
-                                  int rowNumber,
-                                  int columnId,
-                                  int width,
-                                  int height,
-                                  bool rowIsSelected)
+// Paint cell
+void PlaylistComponent::paintCell(juce::Graphics &g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
 {
   g.setColour(juce::Colours::black);
   g.setFont(juce::FontOptions(14.0f));
   g.drawText(trackTitles[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
 }
 
-Component *PlaylistComponent::refreshComponentForCell(int rowNumber,
-                                                      int columnId,
-                                                      bool isRowSelected,
-                                                      Component *existingComponentToUpdate)
+// Refresh component for cell
+Component *PlaylistComponent::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component *existingComponentToUpdate)
 {
-  if (columnId == 2)
+  if (columnId == 2 || columnId == 3)
   {
     if (existingComponentToUpdate == nullptr)
     {
-      TextButton *playButton = new TextButton("Play");
-      String id = String(rowNumber);
+      TextButton *playButton = new TextButton(columnId == 2 ? "Play Deck 1" : "Play Deck 2");
+      String id = String(rowNumber) + (columnId == 2 ? "_1" : "_2");
       playButton->setComponentID(id);
       playButton->addListener(this);
       existingComponentToUpdate = playButton;
@@ -108,12 +96,38 @@ Component *PlaylistComponent::refreshComponentForCell(int rowNumber,
   return existingComponentToUpdate;
 }
 
+// Button clicked
 void PlaylistComponent::buttonClicked(Button *button)
 {
-  if (button->getButtonText() == "Play")
+  if (button == &loadButton)
   {
-    int id = button->getComponentID().getIntValue();
+    auto fileChooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+    fChooser.launchAsync(fileChooserFlags, [this](const FileChooser &chooser)
+                         {
+      File file = chooser.getResult();
+      if (file.existsAsFile())
+      {
+        trackTitles.push_back(file.getFullPathName().toStdString());
+        tableComponent.updateContent();
+      } });
+  }
+  else if (button->getButtonText().startsWith("Play Deck"))
+  {
+    String id = button->getComponentID();
+    int rowNumber = id.upToFirstOccurrenceOf("_", false, false).getIntValue();
+    bool isDeck1 = id.endsWith("_1");
 
-    std::cout << "Play button clicked " << button->getComponentID() << " Play " << trackTitles[id] << std::endl;
+    std::cout << "Play button clicked " << button->getButtonText() << " Play " << trackTitles[rowNumber] << std::endl;
+
+    if (isDeck1)
+    {
+      player1->loadURL(URL{File{trackTitles[rowNumber]}});
+      player1->start();
+    }
+    else
+    {
+      player2->loadURL(URL{File{trackTitles[rowNumber]}});
+      player2->start();
+    }
   }
 }

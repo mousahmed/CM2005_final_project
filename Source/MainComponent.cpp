@@ -10,6 +10,9 @@
 
 //==============================================================================
 MainComponent::MainComponent()
+    : playlistComponent(&player1, &player2),
+      deckGUI1(&player1, formatManager, thumbCache),
+      deckGUI2(&player2, formatManager, thumbCache)
 {
     // Make sure you set the size of the component after
     // you add any child components.

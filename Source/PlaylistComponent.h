@@ -11,18 +11,19 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "vector"
-#include "string"
+#include "DJAudioPlayer.h"
+#include "WaveformDisplay.h"
+#include <vector>
+#include <string>
 //==============================================================================
-/*
- */
+// PlaylistComponent class
 class PlaylistComponent : public juce::Component,
                           public juce::TableListBoxModel,
                           public Button::Listener
 
 {
 public:
-  PlaylistComponent();
+  PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2);
   ~PlaylistComponent() override;
 
   void paint(juce::Graphics &) override;
@@ -46,7 +47,11 @@ public:
   void buttonClicked(Button *button) override;
 
 private:
+  DJAudioPlayer *player1;
+  DJAudioPlayer *player2;
+  TextButton loadButton;
   TableListBox tableComponent;
+  juce::FileChooser fChooser{"Select a file..."};
   std::vector<std::string> trackTitles;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaylistComponent)
 };
