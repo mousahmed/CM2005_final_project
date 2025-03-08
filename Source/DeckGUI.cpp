@@ -39,7 +39,25 @@ DeckGUI::DeckGUI(DJAudioPlayer *_player,
     volSlider.setRange(0.0, 1.0);
     speedSlider.setRange(0.0, 100.0);
     posSlider.setRange(0.0, 1.0);
+    //===================Modified Code======================================
+    // Set tooltips
+    playButton.setTooltip("Play the track");
+    stopButton.setTooltip("Stop the track");
+    loadButton.setTooltip("Load a track");
+    volSlider.setTooltip("Adjust volume");
+    speedSlider.setTooltip("Adjust speed");
+    posSlider.setTooltip("Adjust position");
 
+    // Set button colors
+    playButton.setColour(TextButton::buttonColourId, Colours::green);
+    stopButton.setColour(TextButton::buttonColourId, Colours::red);
+    loadButton.setColour(TextButton::buttonColourId, Colours::blue);
+
+    // Set slider colors
+    volSlider.setColour(Slider::thumbColourId, Colours::yellow);
+    speedSlider.setColour(Slider::thumbColourId, Colours::orange);
+    posSlider.setColour(Slider::thumbColourId, Colours::purple);
+    //===================END Modified Code======================================
     startTimer(500);
 }
 

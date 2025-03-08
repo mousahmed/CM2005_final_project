@@ -1,3 +1,42 @@
+// START CustomLookAndFeel.h
+/*
+  ==============================================================================
+
+    CustomLookAndFeel.h
+    Created: 08 Mar 2025 12:19:32pm
+    Author:  MousA
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+
+class CustomLookAndFeel : public LookAndFeel_V4
+{
+public:
+  CustomLookAndFeel()
+  {
+    setColour(Slider::thumbColourId, Colours::yellow);
+    setColour(Slider::trackColourId, Colours::grey);
+  }
+
+  void drawLinearSliderThumb(Graphics &g, int x, int y, int width, int height, float sliderPos,
+                             float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider &slider) override
+  {
+    g.setColour(findColour(Slider::thumbColourId));
+    g.fillRect(Rectangle<float>(static_cast<float>(x), sliderPos - 5.0f, static_cast<float>(width), 10.0f));
+  }
+
+  void drawLinearSlider(Graphics &g, int x, int y, int width, int height, float sliderPos,
+                        float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider &slider) override
+  {
+    g.setColour(findColour(Slider::trackColourId));
+    g.fillRect(Rectangle<float>(static_cast<float>(x), minSliderPos, static_cast<float>(width), sliderPos - minSliderPos));
+  }
+};
+// END CustomLookAndFeel.h
 // START DeckGUI.h
 /*
   ==============================================================================
@@ -62,6 +101,7 @@ private:
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)
 };
 // END DeckGUI.h
+
 // START DeckGUI.cpp
 /*
   ==============================================================================
@@ -69,6 +109,8 @@ private:
     DeckGUI.cpp
     Created: 13 Mar 2020 6:44:48pm
     Author:  matthew
+    Modifed: 08 Mar 2025 12:19:32pm
+    Updated: MousA
 
   ==============================================================================
 */
@@ -104,6 +146,26 @@ DeckGUI::DeckGUI(DJAudioPlayer *_player,
   volSlider.setRange(0.0, 1.0);
   speedSlider.setRange(0.0, 100.0);
   posSlider.setRange(0.0, 1.0);
+
+  //===================Modified Code======================================
+  // Set tooltips
+  playButton.setTooltip("Play the track");
+  stopButton.setTooltip("Stop the track");
+  loadButton.setTooltip("Load a track");
+  volSlider.setTooltip("Adjust volume");
+  speedSlider.setTooltip("Adjust speed");
+  posSlider.setTooltip("Adjust position");
+
+  // Set button colors
+  playButton.setColour(TextButton::buttonColourId, Colours::green);
+  stopButton.setColour(TextButton::buttonColourId, Colours::red);
+  loadButton.setColour(TextButton::buttonColourId, Colours::blue);
+
+  // Set slider colors
+  volSlider.setColour(Slider::thumbColourId, Colours::yellow);
+  speedSlider.setColour(Slider::thumbColourId, Colours::orange);
+  posSlider.setColour(Slider::thumbColourId, Colours::purple);
+  //===================END Modified Code======================================
 
   startTimer(500);
 }
@@ -151,11 +213,13 @@ void DeckGUI::buttonClicked(Button *button)
   {
     std::cout << "Play button was clicked " << std::endl;
     player->start();
+    playButton.setColour(TextButton::buttonColourId, Colours::darkgreen);
   }
   if (button == &stopButton)
   {
     std::cout << "Stop button was clicked " << std::endl;
     player->stop();
+    stopButton.setColour(TextButton::buttonColourId, Colours::darkred);
   }
   if (button == &loadButton)
   {
@@ -167,6 +231,7 @@ void DeckGUI::buttonClicked(Button *button)
             if (chosenFile.exists()){
                 player->loadURL(URL{chooser.getResult()});
                 waveformDisplay.loadURL(URL{chooser.getResult()});
+                loadButton.setColour(TextButton::buttonColourId, Colours::darkblue);
             } });
   }
 }

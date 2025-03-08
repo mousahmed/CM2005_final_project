@@ -29,6 +29,31 @@ Based on **Copilot's analysis** of `combined.cpp`, here is the structured **step
 3. **Auto-Fade Between Tracks** – Smooth transition from one deck to another.
 
 ---
+### **📌 Implementing Auto-Fade Between Tracks**
+**Goal:** Smoothly transition from one deck to another by gradually decreasing the volume of the active deck while increasing the volume of the new deck.
+
+---
+
+## **📌 Step-by-Step Implementation Plan**
+We will modify **`DeckGUI`** and **`DJAudioPlayer`** to support **auto-fading** between decks.
+
+### **1. Modify `DeckGUI` to Add an Auto-Fade Button**
+- Add an **"Auto-Fade"** button to each deck’s UI.
+- When clicked, the button should:
+  - Check if **both decks are playing**.
+  - Start **fading out Deck 1** while **fading in Deck 2** (or vice versa).
+  
+### **2. Implement Auto-Fade Logic in `DJAudioPlayer`**
+- Modify `DJAudioPlayer` to include a **fadeVolume()** function that:
+  - Gradually decreases the volume of one track.
+  - Gradually increases the volume of the other.
+- Use a **timer** to smoothly adjust volume levels over a set duration.
+
+### **3. Ensure Smooth Integration**
+- The fade should be **seamless** and work within a defined time frame (e.g., **3-5 seconds**).
+- If **one deck is not playing**, prevent the fade from executing.
+
+---
 
 ### **2.1 Identify and Design the Feature**
 - Decide on **which feature to implement** based on feasibility.
@@ -82,4 +107,3 @@ Based on **Copilot's analysis** of `combined.cpp`, here is the structured **step
 - **Finalize with testing & debugging** (Phase 3).
 - **Submit a polished and well-tested project.**
 
-Would you like help with any specific part of the implementation? 🚀
