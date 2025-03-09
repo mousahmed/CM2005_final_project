@@ -24,3 +24,8 @@ Builds/
 .vscode/
 dist/
 bin/
+
+# Markup files
+Implementation.md
+Instructions.md
+Plan.md

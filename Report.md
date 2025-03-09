@@ -40,7 +40,29 @@
 
 ---
 
-## 4. Code Refactoring & Improvements
+## 4. Auto-Fade Between Tracks
+
+### **Feature Overview**
+- **Auto-Fade** is a feature that enhances the DJing experience by smoothly transitioning the audio output between two decks.
+- In OtoDecks, Auto-Fade works by gradually decreasing the volume of the currently playing track while simultaneously increasing the volume of the next track, ensuring a seamless transition.
+
+### **Reason for Choosing Auto-Fade**
+- Auto-Fade was chosen over Beat Matching or Sound Effects due to its ease of implementation and practical usability for DJs.
+- It provides a straightforward way to manage transitions between tracks without requiring complex beat analysis or additional sound effect libraries.
+
+### **Implementation Details**
+- Modifications were made to `DeckGUI` to include an **Auto-Fade button** that users can click to initiate the transition.
+- The `DJAudioPlayer` class was updated with a new method `fadeVolume()` to handle the volume changes.
+- The volume transition is managed using a timer that smoothly adjusts the volume levels over a few seconds, ensuring a gradual fade effect.
+
+### **Testing and Expected Behavior**
+- Auto-Fade is triggered when both decks are playing, allowing for a smooth transition between tracks.
+- The feature prevents abrupt volume changes, providing a more professional and polished DJing experience.
+- Testing results showed that the transition is smooth and occurs within the expected timing, enhancing the overall user experience.
+
+---
+
+## 5. Code Refactoring & Improvements
 
 ### **Code Organization**
 - Refactored `DeckGUI` and `PlaylistComponent` for **better readability and maintainability**.

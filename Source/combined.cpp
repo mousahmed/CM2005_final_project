@@ -8,7 +8,6 @@
 
   ==============================================================================
 */
-
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -57,6 +56,178 @@ public:
 //==============================================================================
 /*
  */
+/*
+  ==============================================================================
+
+    DeckGUI.cpp
+    Created: 13 Mar 2020 6:44:48pm
+    Author:  matthew
+
+  ==============================================================================
+*/
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DeckGUI.h"
+
+//==============================================================================
+DeckGUI::DeckGUI(DJAudioPlayer *_player,
+                 AudioFormatManager &formatManagerToUse,
+                 AudioThumbnailCache &cacheToUse,
+                 DJAudioPlayer *_otherPlayer) : player(_player),
+                                                waveformDisplay(formatManagerToUse, cacheToUse),
+                                                otherPlayer(_otherPlayer)
+{
+
+  addAndMakeVisible(playButton);
+  addAndMakeVisible(stopButton);
+  addAndMakeVisible(loadButton);
+
+  addAndMakeVisible(volSlider);
+  addAndMakeVisible(speedSlider);
+  addAndMakeVisible(posSlider);
+
+  addAndMakeVisible(waveformDisplay);
+
+  playButton.addListener(this);
+  stopButton.addListener(this);
+  loadButton.addListener(this);
+
+  volSlider.addListener(this);
+  speedSlider.addListener(this);
+  posSlider.addListener(this);
+
+  volSlider.setRange(0.0, 1.0);
+  speedSlider.setRange(0.0, 100.0);
+  posSlider.setRange(0.0, 1.0);
+  //===================Modified Code======================================
+  // Set tooltips
+  playButton.setTooltip("Play the track");
+  stopButton.setTooltip("Stop the track");
+  loadButton.setTooltip("Load a track");
+  volSlider.setTooltip("Adjust volume");
+  speedSlider.setTooltip("Adjust speed");
+  posSlider.setTooltip("Adjust position");
+
+  // Set button colors
+  playButton.setColour(TextButton::buttonColourId, Colours::green);
+  stopButton.setColour(TextButton::buttonColourId, Colours::red);
+  loadButton.setColour(TextButton::buttonColourId, Colours::blue);
+
+  // Set slider colors
+  volSlider.setColour(Slider::thumbColourId, Colours::yellow);
+  speedSlider.setColour(Slider::thumbColourId, Colours::orange);
+  posSlider.setColour(Slider::thumbColourId, Colours::purple);
+  //===================END Modified Code======================================
+  addAndMakeVisible(autoFadeButton);
+  autoFadeButton.addListener(this);
+  autoFadeButton.setTooltip("Auto-fade between tracks");
+  autoFadeButton.setColour(TextButton::buttonColourId, Colours::purple);
+  startTimer(500);
+
+  addAndMakeVisible(volLabel);
+  addAndMakeVisible(speedLabel);
+  addAndMakeVisible(posLabel);
+
+  volLabel.setText("Volume", dontSendNotification);
+  speedLabel.setText("Speed", dontSendNotification);
+  posLabel.setText("Position", dontSendNotification);
+
+  volLabel.attachToComponent(&volSlider, false);
+  speedLabel.attachToComponent(&speedSlider, false);
+  posLabel.attachToComponent(&posSlider, false);
+}
+
+/*
+  ==============================================================================
+
+    DeckGUI.h
+    Created: 13 Mar 2020 6:44:48pm
+    Author:  matthew
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DJAudioPlayer.h"
+#include "WaveformDisplay.h"
+
+//==============================================================================
+/*
+ */
+class DeckGUI : public Component,
+                public Button::Listener,
+                public Slider::Listener,
+                public FileDragAndDropTarget,
+                public Timer
+{
+public:
+  DeckGUI(DJAudioPlayer *player,
+          AudioFormatManager &formatManagerToUse,
+          AudioThumbnailCache &cacheToUse,
+          DJAudioPlayer *otherPlayer);
+  ~DeckGUI();
+
+  void paint(Graphics &) override;
+  void resized() override;
+
+  /** implement Button::Listener */
+  void buttonClicked(Button *) override;
+
+  /** implement Slider::Listener */
+  void sliderValueChanged(Slider *slider) override;
+
+  bool isInterestedInFileDrag(const StringArray &files) override;
+  void filesDropped(const StringArray &files, int x, int y) override;
+
+  void timerCallback() override;
+
+  void loadWaveform(URL audioURL);
+
+private:
+  juce::FileChooser fChooser{"Select a file..."};
+
+  TextButton playButton{"PLAY"};
+  TextButton stopButton{"STOP"};
+  TextButton loadButton{"LOAD"};
+  TextButton autoFadeButton{"AUTO-FADE"};
+
+  Slider volSlider;
+  Slider speedSlider;
+  Slider posSlider;
+
+  Label volLabel;
+  Label speedLabel;
+  Label posLabel;
+
+  DJAudioPlayer *player;
+  DJAudioPlayer *otherPlayer;
+
+  WaveformDisplay waveformDisplay;
+
+  JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeckGUI)
+};
+
+// END DeckGUI.h
+
+// START DeckGUI.cpp
+/*
+  ==============================================================================
+
+    DeckGUI.cpp
+    Created: 13 Mar 2020 6:44:48pm
+    Author:  matthew
+    Modifed: 08 Mar 2025 12:19:32pm
+    Updated: MousA
+
+  ==============================================================================
+*/
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DeckGUI.h"
+
+//==============================================================================
 /*
   ==============================================================================
 
@@ -262,181 +433,7 @@ void DeckGUI::loadWaveform(URL audioURL)
 {
   waveformDisplay.loadURL(audioURL);
 }
-// END DeckGUI.h
 
-// START DeckGUI.cpp
-/*
-  ==============================================================================
-
-    DeckGUI.cpp
-    Created: 13 Mar 2020 6:44:48pm
-    Author:  matthew
-    Modifed: 08 Mar 2025 12:19:32pm
-    Updated: MousA
-
-  ==============================================================================
-*/
-
-#include "../JuceLibraryCode/JuceHeader.h"
-#include "DeckGUI.h"
-
-//==============================================================================
-DeckGUI::DeckGUI(DJAudioPlayer *_player,
-                 AudioFormatManager &formatManagerToUse,
-                 AudioThumbnailCache &cacheToUse) : player(_player),
-                                                    waveformDisplay(formatManagerToUse, cacheToUse)
-{
-
-  addAndMakeVisible(playButton);
-  addAndMakeVisible(stopButton);
-  addAndMakeVisible(loadButton);
-
-  addAndMakeVisible(volSlider);
-  addAndMakeVisible(speedSlider);
-  addAndMakeVisible(posSlider);
-
-  addAndMakeVisible(waveformDisplay);
-
-  playButton.addListener(this);
-  stopButton.addListener(this);
-  loadButton.addListener(this);
-
-  volSlider.addListener(this);
-  speedSlider.addListener(this);
-  posSlider.addListener(this);
-
-  volSlider.setRange(0.0, 1.0);
-  speedSlider.setRange(0.0, 100.0);
-  posSlider.setRange(0.0, 1.0);
-
-  //===================Modified Code======================================
-  // Set tooltips
-  playButton.setTooltip("Play the track");
-  stopButton.setTooltip("Stop the track");
-  loadButton.setTooltip("Load a track");
-  volSlider.setTooltip("Adjust volume");
-  speedSlider.setTooltip("Adjust speed");
-  posSlider.setTooltip("Adjust position");
-
-  // Set button colors
-  playButton.setColour(TextButton::buttonColourId, Colours::green);
-  stopButton.setColour(TextButton::buttonColourId, Colours::red);
-  loadButton.setColour(TextButton::buttonColourId, Colours::blue);
-
-  // Set slider colors
-  volSlider.setColour(Slider::thumbColourId, Colours::yellow);
-  speedSlider.setColour(Slider::thumbColourId, Colours::orange);
-  posSlider.setColour(Slider::thumbColourId, Colours::purple);
-  //===================END Modified Code======================================
-
-  startTimer(500);
-}
-
-DeckGUI::~DeckGUI()
-{
-  stopTimer();
-}
-
-void DeckGUI::paint(Graphics &g)
-{
-  /* This demo code just fills the component's background and
-     draws some placeholder text to get you started.
-
-     You should replace everything in this method with your own
-     drawing code..
-  */
-
-  g.fillAll(getLookAndFeel().findColour(ResizableWindow::backgroundColourId)); // clear the background
-
-  g.setColour(Colours::grey);
-  g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-
-  g.setColour(Colours::white);
-  g.setFont(14.0f);
-  g.drawText("DeckGUI", getLocalBounds(),
-             Justification::centred, true); // draw some placeholder text
-}
-
-void DeckGUI::resized()
-{
-  double rowH = getHeight() / 8;
-  playButton.setBounds(0, 0, getWidth(), rowH);
-  stopButton.setBounds(0, rowH, getWidth(), rowH);
-  volSlider.setBounds(0, rowH * 2, getWidth(), rowH);
-  speedSlider.setBounds(0, rowH * 3, getWidth(), rowH);
-  posSlider.setBounds(0, rowH * 4, getWidth(), rowH);
-  waveformDisplay.setBounds(0, rowH * 5, getWidth(), rowH * 2);
-  loadButton.setBounds(0, rowH * 7, getWidth(), rowH);
-}
-
-void DeckGUI::buttonClicked(Button *button)
-{
-  if (button == &playButton)
-  {
-    std::cout << "Play button was clicked " << std::endl;
-    player->start();
-    playButton.setColour(TextButton::buttonColourId, Colours::darkgreen);
-  }
-  if (button == &stopButton)
-  {
-    std::cout << "Stop button was clicked " << std::endl;
-    player->stop();
-    stopButton.setColour(TextButton::buttonColourId, Colours::darkred);
-  }
-  if (button == &loadButton)
-  {
-    auto fileChooserFlags =
-        FileBrowserComponent::canSelectFiles;
-    fChooser.launchAsync(fileChooserFlags, [this](const FileChooser &chooser)
-                         {
-            File chosenFile = chooser.getResult();
-            if (chosenFile.exists()){
-                player->loadURL(URL{chooser.getResult()});
-                waveformDisplay.loadURL(URL{chooser.getResult()});
-                loadButton.setColour(TextButton::buttonColourId, Colours::darkblue);
-            } });
-  }
-}
-
-void DeckGUI::sliderValueChanged(Slider *slider)
-{
-  if (slider == &volSlider)
-  {
-    player->setGain(slider->getValue());
-  }
-
-  if (slider == &speedSlider)
-  {
-    player->setSpeed(slider->getValue());
-  }
-
-  if (slider == &posSlider)
-  {
-    player->setPositionRelative(slider->getValue());
-  }
-}
-
-bool DeckGUI::isInterestedInFileDrag(const StringArray &files)
-{
-  std::cout << "DeckGUI::isInterestedInFileDrag" << std::endl;
-  return true;
-}
-
-void DeckGUI::filesDropped(const StringArray &files, int x, int y)
-{
-  std::cout << "DeckGUI::filesDropped" << std::endl;
-  if (files.size() == 1)
-  {
-    player->loadURL(URL{File{files[0]}});
-  }
-}
-
-void DeckGUI::timerCallback()
-{
-  // std::cout << "DeckGUI::timerCallback" << std::endl;
-  waveformDisplay.setPositionRelative(
-      player->getPositionRelative());
-}
 // END DeckGUI.cpp
 
 // START DJAudioPlayer.h
@@ -605,13 +602,33 @@ double DJAudioPlayer::getPositionRelative()
 //==============================================================================
 /*
  */
+/*
+  ==============================================================================
+
+    PlaylistComponent.h
+    Created: 20 Feb 2025 12:19:32pm
+    Author:  MousA
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DJAudioPlayer.h"
+#include "DeckGUI.h" // Include DeckGUI header
+#include "WaveformDisplay.h"
+#include <vector>
+#include <string>
+//==============================================================================
+// PlaylistComponent class
 class PlaylistComponent : public juce::Component,
                           public juce::TableListBoxModel,
                           public Button::Listener
 
 {
 public:
-  PlaylistComponent();
+  PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2, DeckGUI *_deckGUI1, DeckGUI *_deckGUI2);
   ~PlaylistComponent() override;
 
   void paint(juce::Graphics &) override;
@@ -635,7 +652,13 @@ public:
   void buttonClicked(Button *button) override;
 
 private:
+  DJAudioPlayer *player1;
+  DJAudioPlayer *player2;
+  DeckGUI *deckGUI1;
+  DeckGUI *deckGUI2;
+  TextButton loadButton;
   TableListBox tableComponent;
+  juce::FileChooser fChooser{"Select a file..."};
   std::vector<std::string> trackTitles;
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PlaylistComponent)
 };
@@ -656,62 +679,67 @@ private:
 #include "PlaylistComponent.h"
 #include "iostream"
 //==============================================================================
-PlaylistComponent::PlaylistComponent()
-{
-  // In your constructor, you should add any child components, and
-  // initialise any special settings that your component needs.
+/*
+  ==============================================================================
 
-  trackTitles.push_back("Track 1");
-  trackTitles.push_back("Track 2");
-  trackTitles.push_back("Track 3");
-  tableComponent.getHeader().addColumn("Track Title", 1, 400);
-  tableComponent.getHeader().addColumn("Track Title", 2, 400);
-  tableComponent.getHeader().addColumn("Track Title", 3, 400);
+    PlaylistComponent.cpp
+    Created: 20 Feb 2025 12:19:32pm
+    Author:  MousA
+
+  ==============================================================================
+*/
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "PlaylistComponent.h"
+#include "DJAudioPlayer.h"
+#include "iostream"
+//==============================================================================
+// Constructor
+PlaylistComponent::PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2, DeckGUI *_deckGUI1, DeckGUI *_deckGUI2)
+    : player1(_player1), player2(_player2), deckGUI1(_deckGUI1), deckGUI2(_deckGUI2)
+{
+  // Initialize table columns
+  tableComponent.getHeader().addColumn("Track Title", 1, 500);
+  tableComponent.getHeader().addColumn("Play Deck 1", 2, 150);
+  tableComponent.getHeader().addColumn("Play Deck 2", 3, 150);
   tableComponent.setModel(this);
   addAndMakeVisible(tableComponent);
+
+  // Initialize load button
+  addAndMakeVisible(loadButton);
+  loadButton.setButtonText("Load Tracks");
+  loadButton.addListener(this);
 }
 
-PlaylistComponent::~PlaylistComponent()
-{
-}
+// Destructor
+PlaylistComponent::~PlaylistComponent() {}
 
+// Paint method
 void PlaylistComponent::paint(juce::Graphics &g)
 {
-  /* This demo code just fills the component's background and
-     draws some placeholder text to get you started.
-
-     You should replace everything in this method with your own
-     drawing code..
-  */
-
-  g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId)); // clear the background
-
+  g.fillAll(getLookAndFeel().findColour(juce::ResizableWindow::backgroundColourId));
   g.setColour(juce::Colours::grey);
-  g.drawRect(getLocalBounds(), 1); // draw an outline around the component
-
+  g.drawRect(getLocalBounds(), 1);
   g.setColour(juce::Colours::white);
   g.setFont(juce::FontOptions(14.0f));
-  g.drawText("PlaylistComponent", getLocalBounds(),
-             juce::Justification::centred, true); // draw some placeholder text
+  g.drawText("PlaylistComponent", getLocalBounds(), juce::Justification::centred, true);
 }
 
+// Resized method
 void PlaylistComponent::resized()
 {
-  // This method is where you should set the bounds of any child
-  // components that your component contains..
-  tableComponent.setBounds(0, 0, getWidth(), getHeight());
+  tableComponent.setBounds(0, 0, getWidth(), getHeight() - 40); // Adjusted height
+  loadButton.setBounds(0, getHeight() - 40, getWidth(), 40);    // Increased height of the load button
 }
 
+// Get number of rows
 int PlaylistComponent::getNumRows()
 {
   return trackTitles.size();
 }
 
-void PlaylistComponent::paintRowBackground(juce::Graphics &g,
-                                           int rowNumber,
-                                           int width,
-                                           int height,
-                                           bool rowIsSelected)
+// Paint row background
+void PlaylistComponent::paintRowBackground(juce::Graphics &g, int rowNumber, int width, int height, bool rowIsSelected)
 {
   if (rowIsSelected)
   {
@@ -723,29 +751,23 @@ void PlaylistComponent::paintRowBackground(juce::Graphics &g,
   }
 }
 
-void PlaylistComponent::paintCell(juce::Graphics &g,
-                                  int rowNumber,
-                                  int columnId,
-                                  int width,
-                                  int height,
-                                  bool rowIsSelected)
+// Paint cell
+void PlaylistComponent::paintCell(juce::Graphics &g, int rowNumber, int columnId, int width, int height, bool rowIsSelected)
 {
   g.setColour(juce::Colours::black);
   g.setFont(juce::FontOptions(14.0f));
   g.drawText(trackTitles[rowNumber], 2, 0, width - 4, height, juce::Justification::centredLeft, true);
 }
 
-Component *PlaylistComponent::refreshComponentForCell(int rowNumber,
-                                                      int columnId,
-                                                      bool isRowSelected,
-                                                      Component *existingComponentToUpdate)
+// Refresh component for cell
+Component *PlaylistComponent::refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, Component *existingComponentToUpdate)
 {
-  if (columnId == 2)
+  if (columnId == 2 || columnId == 3)
   {
     if (existingComponentToUpdate == nullptr)
     {
-      TextButton *playButton = new TextButton("Play");
-      String id = String(rowNumber);
+      TextButton *playButton = new TextButton(columnId == 2 ? "Play Deck 1" : "Play Deck 2");
+      String id = String(rowNumber) + (columnId == 2 ? "_1" : "_2");
       playButton->setComponentID(id);
       playButton->addListener(this);
       existingComponentToUpdate = playButton;
@@ -755,13 +777,46 @@ Component *PlaylistComponent::refreshComponentForCell(int rowNumber,
   return existingComponentToUpdate;
 }
 
+// Button clicked
 void PlaylistComponent::buttonClicked(Button *button)
 {
-  if (button->getButtonText() == "Play")
+  if (button == &loadButton)
   {
-    int id = button->getComponentID().getIntValue();
+    auto fileChooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles | FileBrowserComponent::canSelectMultipleItems;
+    fChooser.launchAsync(fileChooserFlags, [this](const FileChooser &chooser)
+                         {
+            auto results = chooser.getResults();
+            for (const auto& file : results)
+            {
+                if (file.existsAsFile())
+                {
+                    trackTitles.push_back(file.getFullPathName().toStdString());
+                }
+            }
+            tableComponent.updateContent(); });
+  }
+  else if (button->getButtonText().startsWith("Play Deck"))
+  {
+    String id = button->getComponentID();
+    int rowNumber = id.upToFirstOccurrenceOf("_", false, false).getIntValue();
+    bool isDeck1 = id.endsWith("_1");
 
-    std::cout << "Play button clicked " << button->getComponentID() << " Play " << trackTitles[id] << std::endl;
+    std::cout << "Play button clicked " << button->getButtonText() << " Play " << trackTitles[rowNumber] << std::endl;
+
+    if (isDeck1)
+    {
+      player1->loadURL(URL{File{trackTitles[rowNumber]}});
+      player1->start();
+      // Load waveform display for Deck 1
+      deckGUI1->loadWaveform(URL{File{trackTitles[rowNumber]}});
+    }
+    else
+    {
+      player2->loadURL(URL{File{trackTitles[rowNumber]}});
+      player2->start();
+      // Load waveform display for Deck 2
+      deckGUI2->loadWaveform(URL{File{trackTitles[rowNumber]}});
+    }
   }
 }
 // END PlaylistComponent.cpp
@@ -935,6 +990,26 @@ void WaveformDisplay::setPositionRelative(double pos)
     This component lives inside our window, and this is where you should put all
     your controls and content.
 */
+/*
+  ==============================================================================
+
+    This file was auto-generated!
+
+  ==============================================================================
+*/
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+#include "DJAudioPlayer.h"
+#include "DeckGUI.h"
+#include "PlaylistComponent.h"
+
+//==============================================================================
+/*
+    This component lives inside our window, and this is where you should put all
+    your controls and content.
+*/
 class MainComponent : public AudioAppComponent
 {
 public:
@@ -959,16 +1034,17 @@ private:
   AudioThumbnailCache thumbCache{100};
 
   DJAudioPlayer player1{formatManager};
-  DeckGUI deckGUI1{&player1, formatManager, thumbCache};
+  DeckGUI deckGUI1{&player1, formatManager, thumbCache, &player2};
 
   DJAudioPlayer player2{formatManager};
-  DeckGUI deckGUI2{&player2, formatManager, thumbCache};
+  DeckGUI deckGUI2{&player2, formatManager, thumbCache, &player1};
 
   MixerAudioSource mixerSource;
-  PlaylistComponent playlistComponent;
+  PlaylistComponent playlistComponent{&player1, &player2, &deckGUI1, &deckGUI2}; // Pass DeckGUI references
 
   JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };
+
 // END MainComponent.h
 
 // START MainComponent.cpp
@@ -984,10 +1060,13 @@ private:
 
 //==============================================================================
 MainComponent::MainComponent()
+    : playlistComponent(&player1, &player2, &deckGUI1, &deckGUI2),
+      deckGUI1(&player1, formatManager, thumbCache, &player2),
+      deckGUI2(&player2, formatManager, thumbCache, &player1)
 {
   // Make sure you set the size of the component after
   // you add any child components.
-  setSize(800, 600);
+  setSize(800, 800); // Increased height to accommodate the new button and labels
 
   // Some platforms require permissions to open input channels so request that here
   if (RuntimePermissions::isRequired(RuntimePermissions::recordAudio) && !RuntimePermissions::isGranted(RuntimePermissions::recordAudio))
