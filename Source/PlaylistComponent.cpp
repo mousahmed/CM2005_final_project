@@ -14,8 +14,8 @@
 #include "iostream"
 //==============================================================================
 // Constructor
-PlaylistComponent::PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2)
-    : player1(_player1), player2(_player2)
+PlaylistComponent::PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2, DeckGUI *_deckGUI1, DeckGUI *_deckGUI2)
+    : player1(_player1), player2(_player2), deckGUI1(_deckGUI1), deckGUI2(_deckGUI2)
 {
   // Initialize table columns
   tableComponent.getHeader().addColumn("Track Title", 1, 500);
@@ -47,8 +47,8 @@ void PlaylistComponent::paint(juce::Graphics &g)
 // Resized method
 void PlaylistComponent::resized()
 {
-  tableComponent.setBounds(0, 0, getWidth(), getHeight() - 30);
-  loadButton.setBounds(0, getHeight() - 30, getWidth(), 30);
+  tableComponent.setBounds(0, 0, getWidth(), getHeight() - 40); // Adjusted height
+  loadButton.setBounds(0, getHeight() - 40, getWidth(), 40);    // Increased height of the load button
 }
 
 // Get number of rows
@@ -101,15 +101,18 @@ void PlaylistComponent::buttonClicked(Button *button)
 {
   if (button == &loadButton)
   {
-    auto fileChooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles;
+    auto fileChooserFlags = FileBrowserComponent::openMode | FileBrowserComponent::canSelectFiles | FileBrowserComponent::canSelectMultipleItems;
     fChooser.launchAsync(fileChooserFlags, [this](const FileChooser &chooser)
                          {
-      File file = chooser.getResult();
-      if (file.existsAsFile())
-      {
-        trackTitles.push_back(file.getFullPathName().toStdString());
-        tableComponent.updateContent();
-      } });
+            auto results = chooser.getResults();
+            for (const auto& file : results)
+            {
+                if (file.existsAsFile())
+                {
+                    trackTitles.push_back(file.getFullPathName().toStdString());
+                }
+            }
+            tableComponent.updateContent(); });
   }
   else if (button->getButtonText().startsWith("Play Deck"))
   {
@@ -123,11 +126,15 @@ void PlaylistComponent::buttonClicked(Button *button)
     {
       player1->loadURL(URL{File{trackTitles[rowNumber]}});
       player1->start();
+      // Load waveform display for Deck 1
+      deckGUI1->loadWaveform(URL{File{trackTitles[rowNumber]}});
     }
     else
     {
       player2->loadURL(URL{File{trackTitles[rowNumber]}});
       player2->start();
+      // Load waveform display for Deck 2
+      deckGUI2->loadWaveform(URL{File{trackTitles[rowNumber]}});
     }
   }
 }

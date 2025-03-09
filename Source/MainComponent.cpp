@@ -10,13 +10,13 @@
 
 //==============================================================================
 MainComponent::MainComponent()
-    : playlistComponent(&player1, &player2),
-      deckGUI1(&player1, formatManager, thumbCache),
-      deckGUI2(&player2, formatManager, thumbCache)
+    : playlistComponent(&player1, &player2, &deckGUI1, &deckGUI2),
+      deckGUI1(&player1, formatManager, thumbCache, &player2),
+      deckGUI2(&player2, formatManager, thumbCache, &player1)
 {
     // Make sure you set the size of the component after
     // you add any child components.
-    setSize(800, 600);
+    setSize(800, 800); // Increased height to accommodate the new button and labels
 
     // Some platforms require permissions to open input channels so request that here
     if (RuntimePermissions::isRequired(RuntimePermissions::recordAudio) && !RuntimePermissions::isGranted(RuntimePermissions::recordAudio))

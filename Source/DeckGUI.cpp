@@ -14,8 +14,10 @@
 //==============================================================================
 DeckGUI::DeckGUI(DJAudioPlayer *_player,
                  AudioFormatManager &formatManagerToUse,
-                 AudioThumbnailCache &cacheToUse) : player(_player),
-                                                    waveformDisplay(formatManagerToUse, cacheToUse)
+                 AudioThumbnailCache &cacheToUse,
+                 DJAudioPlayer *_otherPlayer) : player(_player),
+                                                waveformDisplay(formatManagerToUse, cacheToUse),
+                                                otherPlayer(_otherPlayer)
 {
 
     addAndMakeVisible(playButton);
@@ -58,7 +60,23 @@ DeckGUI::DeckGUI(DJAudioPlayer *_player,
     speedSlider.setColour(Slider::thumbColourId, Colours::orange);
     posSlider.setColour(Slider::thumbColourId, Colours::purple);
     //===================END Modified Code======================================
+    addAndMakeVisible(autoFadeButton);
+    autoFadeButton.addListener(this);
+    autoFadeButton.setTooltip("Auto-fade between tracks");
+    autoFadeButton.setColour(TextButton::buttonColourId, Colours::purple);
     startTimer(500);
+
+    addAndMakeVisible(volLabel);
+    addAndMakeVisible(speedLabel);
+    addAndMakeVisible(posLabel);
+
+    volLabel.setText("Volume", dontSendNotification);
+    speedLabel.setText("Speed", dontSendNotification);
+    posLabel.setText("Position", dontSendNotification);
+
+    volLabel.attachToComponent(&volSlider, false);
+    speedLabel.attachToComponent(&speedSlider, false);
+    posLabel.attachToComponent(&posSlider, false);
 }
 
 DeckGUI::~DeckGUI()
@@ -88,14 +106,18 @@ void DeckGUI::paint(Graphics &g)
 
 void DeckGUI::resized()
 {
-    double rowH = getHeight() / 8;
+    double rowH = getHeight() / 12; // Adjusted to fit the new button and labels
     playButton.setBounds(0, 0, getWidth(), rowH);
     stopButton.setBounds(0, rowH, getWidth(), rowH);
-    volSlider.setBounds(0, rowH * 2, getWidth(), rowH);
-    speedSlider.setBounds(0, rowH * 3, getWidth(), rowH);
-    posSlider.setBounds(0, rowH * 4, getWidth(), rowH);
-    waveformDisplay.setBounds(0, rowH * 5, getWidth(), rowH * 2);
-    loadButton.setBounds(0, rowH * 7, getWidth(), rowH);
+    autoFadeButton.setBounds(0, rowH * 2, getWidth(), rowH);
+    volLabel.setBounds(0, rowH * 3.2, getWidth(), rowH / 2);
+    volSlider.setBounds(0, rowH * 3.5, getWidth(), rowH);
+    speedLabel.setBounds(0, rowH * 4.7, getWidth(), rowH / 2);
+    speedSlider.setBounds(0, rowH * 5, getWidth(), rowH);
+    posLabel.setBounds(0, rowH * 6, getWidth(), rowH / 2);
+    posSlider.setBounds(0, rowH * 6.7, getWidth(), rowH);
+    waveformDisplay.setBounds(0, rowH * 7.5, getWidth(), rowH * 3);
+    loadButton.setBounds(0, rowH * 11, getWidth(), rowH);
 }
 
 void DeckGUI::buttonClicked(Button *button)
@@ -124,6 +146,16 @@ void DeckGUI::buttonClicked(Button *button)
                 waveformDisplay.loadURL(URL{chooser.getResult()});
                 loadButton.setColour(TextButton::buttonColourId, Colours::darkblue);
             } });
+    }
+    if (button == &autoFadeButton)
+    {
+        std::cout << "Auto-Fade button was clicked " << std::endl;
+        // Check if both decks are playing
+        if (player->isPlaying() && otherPlayer->isPlaying())
+        {
+            player->fadeVolume(player->getGain(), 0.0, 3000);
+            otherPlayer->fadeVolume(otherPlayer->getGain(), 1.0, 3000);
+        }
     }
 }
 
@@ -165,4 +197,9 @@ void DeckGUI::timerCallback()
     // std::cout << "DeckGUI::timerCallback" << std::endl;
     waveformDisplay.setPositionRelative(
         player->getPositionRelative());
+}
+
+void DeckGUI::loadWaveform(URL audioURL)
+{
+    waveformDisplay.loadURL(audioURL);
 }

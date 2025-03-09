@@ -12,6 +12,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "DJAudioPlayer.h"
+#include "DeckGUI.h" // Include DeckGUI header
 #include "WaveformDisplay.h"
 #include <vector>
 #include <string>
@@ -23,7 +24,7 @@ class PlaylistComponent : public juce::Component,
 
 {
 public:
-  PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2);
+  PlaylistComponent(DJAudioPlayer *_player1, DJAudioPlayer *_player2, DeckGUI *_deckGUI1, DeckGUI *_deckGUI2);
   ~PlaylistComponent() override;
 
   void paint(juce::Graphics &) override;
@@ -49,6 +50,8 @@ public:
 private:
   DJAudioPlayer *player1;
   DJAudioPlayer *player2;
+  DeckGUI *deckGUI1;
+  DeckGUI *deckGUI2;
   TextButton loadButton;
   TableListBox tableComponent;
   juce::FileChooser fChooser{"Select a file..."};
